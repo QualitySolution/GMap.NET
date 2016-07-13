@@ -8,8 +8,8 @@ namespace GMap.NET
    using System;
    using GMap.NET.MapProviders;
    using System.Threading;
-   using GMap.NET.Gtk;
-   using GMap.NET.Gtk.Markers;
+   using GMap.NET.GtkSharp;
+   using GMap.NET.GtkSharp.Markers;
 using System.Drawing;
 
    /// <summary>

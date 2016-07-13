@@ -1,5 +1,5 @@
 ﻿
-namespace GMap.NET.Gtk
+namespace GMap.NET.GtkSharp
 {
    using System;
    using System.Drawing;

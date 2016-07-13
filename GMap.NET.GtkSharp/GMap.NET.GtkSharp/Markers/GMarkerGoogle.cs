@@ -1,5 +1,5 @@
 ﻿
-namespace GMap.NET.Gtk.Markers
+namespace GMap.NET.GtkSharp.Markers
 {
    using System.Drawing;
    using System.Collections.Generic;

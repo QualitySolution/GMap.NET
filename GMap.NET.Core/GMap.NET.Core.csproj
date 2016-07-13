@@ -59,7 +59,7 @@
     <BaseIntermediateOutputPath>obj\</BaseIntermediateOutputPath>
     <BaseAddress>4194304</BaseAddress>
     <RegisterForComInterop>False</RegisterForComInterop>
-    <Optimize>false</Optimize>
+    <Optimize>False</Optimize>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|AnyCPU'">
     <TargetFrameworkVersion>v2.0</TargetFrameworkVersion>

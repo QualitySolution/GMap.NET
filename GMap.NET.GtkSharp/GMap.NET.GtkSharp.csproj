@@ -3,11 +3,11 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{E06DEF77-F933-42FB-AFD7-DB2D0D8D6A98}</ProjectGuid>
+    <ProjectGuid>{E06DEF77-F933-42FB-AFD8-DB2D0D8D6A98}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>System.Windows.Forms</RootNamespace>
-    <AssemblyName>GMap.NET.Gtk</AssemblyName>
+    <AssemblyName>GMap.NET.GtkSharp</AssemblyName>
     <FileAlignment>512</FileAlignment>
     <SignAssembly>true</SignAssembly>
     <AssemblyOriginatorKeyFile>sn.snk</AssemblyOriginatorKeyFile>
@@ -82,38 +82,39 @@
     <Reference Include="System" />
     <Reference Include="System.Drawing" />
     <Reference Include="System.Windows.Forms" />
+    <Reference Include="gtk-sharp, Version=2.12.0.0, Culture=neutral, PublicKeyToken=35e10195dab3c99f" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="..\GMap.NET.Core\Properties\VersionInfo.cs">
       <Link>Properties\VersionInfo.cs</Link>
     </Compile>
-    <Compile Include="GMap.NET.Gtk\ColorMatrixs.cs" />
-    <Compile Include="GMap.NET.Gtk\GMapPolygon.cs" />
-    <Compile Include="GMap.NET.Gtk\Markers\GMarkerGoogle.cs" />
-    <Compile Include="GMap.NET.Gtk\ToolTips\GMapBaloonToolTip.cs" />
-    <Compile Include="GMap.NET.Gtk\ToolTips\GMapRoundedToolTip.cs" />
-    <Compile Include="GMap.NET.Gtk\GMapToolTip.cs" />
-    <Compile Include="GMap.NET.Gtk\TilePrefetcher.cs">
+    <Compile Include="GMap.NET.GtkSharp\ColorMatrixs.cs" />
+    <Compile Include="GMap.NET.GtkSharp\GMapPolygon.cs" />
+    <Compile Include="GMap.NET.GtkSharp\Markers\GMarkerGoogle.cs" />
+    <Compile Include="GMap.NET.GtkSharp\ToolTips\GMapBaloonToolTip.cs" />
+    <Compile Include="GMap.NET.GtkSharp\ToolTips\GMapRoundedToolTip.cs" />
+    <Compile Include="GMap.NET.GtkSharp\GMapToolTip.cs" />
+    <Compile Include="GMap.NET.GtkSharp\TilePrefetcher.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="GMap.NET.Gtk\TilePrefetcher.Designer.cs">
+    <Compile Include="GMap.NET.GtkSharp\TilePrefetcher.Designer.cs">
       <DependentUpon>TilePrefetcher.cs</DependentUpon>
     </Compile>
-    <Compile Include="GMap.NET.Gtk\GMapMarker.cs" />
-    <Compile Include="GMap.NET.Gtk\Markers\GMarkerCross.cs" />
-    <Compile Include="GMap.NET.Gtk\GMapOverlay.cs" />
-    <Compile Include="GMap.NET.Gtk\GMapImage.cs" />
+    <Compile Include="GMap.NET.GtkSharp\GMapMarker.cs" />
+    <Compile Include="GMap.NET.GtkSharp\Markers\GMarkerCross.cs" />
+    <Compile Include="GMap.NET.GtkSharp\GMapOverlay.cs" />
+    <Compile Include="GMap.NET.GtkSharp\GMapImage.cs" />
     <Compile Include="Properties\Resources.Designer.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
-    <Compile Include="GMap.NET.Gtk\GMapRoute.cs" />
+    <Compile Include="GMap.NET.GtkSharp\GMapRoute.cs" />
     <Compile Include="GMap.NET.ObjectModel\ObservableCollection.cs">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="GMap.NET.ObjectModel\ObservableCollectionThreadSafe.cs" />
-    <Compile Include="GMap.NET.Gtk\GMapControl.cs">
+    <Compile Include="GMap.NET.GtkSharp\GMapControl.cs">
       <SubType>UserControl</SubType>
     </Compile>
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -127,7 +128,7 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="GMap.NET.Gtk\TilePrefetcher.resx">
+    <EmbeddedResource Include="GMap.NET.GtkSharp\TilePrefetcher.resx">
       <DependentUpon>TilePrefetcher.cs</DependentUpon>
       <SubType>Designer</SubType>
     </EmbeddedResource>

@@ -1,11 +1,11 @@
 ﻿
-namespace GMap.NET.Gtk
+namespace GMap.NET.GtkSharp
 {
    using System;
    using System.Drawing;
    using System.Runtime.Serialization;
    using System.Windows.Forms;
-   using GMap.NET.Gtk.ToolTips;
+   using GMap.NET.GtkSharp.ToolTips;
 
    /// <summary>
    /// GMap.NET marker

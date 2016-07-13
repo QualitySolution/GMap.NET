@@ -1,5 +1,5 @@
 ﻿
-namespace GMap.NET.Gtk.ToolTips
+namespace GMap.NET.GtkSharp.ToolTips
 {
    using System.Drawing;
    using System.Drawing.Drawing2D;
