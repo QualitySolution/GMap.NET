@@ -3,8 +3,6 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProductVersion>9.0.30729</ProductVersion>
-    <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>{D0C39D9D-BED0-418B-9A5E-713176CAF40C}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
@@ -45,7 +43,7 @@
     <TargetFrameworkVersion>v2.0</TargetFrameworkVersion>
     <DebugSymbols>true</DebugSymbols>
     <OutputPath>bin\Debug\</OutputPath>
-    <DefineConstants>TRACE;DEBUG;MONO_disabled; MySQL_disabled; PostgreSQL_disabled; SQLite</DefineConstants>
+    <DefineConstants>TRACE;DEBUG;MONO; MySQL_disabled; PostgreSQL_disabled; SQLite</DefineConstants>
     <DebugType>Full</DebugType>
     <PlatformTarget>AnyCPU</PlatformTarget>
     <CodeAnalysisLogFile>bin\x86\Debug\GMap.NET.Core.dll.CodeAnalysisLog.xml</CodeAnalysisLogFile>
@@ -58,11 +56,15 @@
     <CodeAnalysisIgnoreBuiltInRuleSets>true</CodeAnalysisIgnoreBuiltInRuleSets>
     <CodeAnalysisRuleDirectories>;C:\Program Files (x86)\Microsoft Visual Studio 10.0\Team Tools\Static Analysis Tools\FxCop\\Rules</CodeAnalysisRuleDirectories>
     <CodeAnalysisIgnoreBuiltInRules>true</CodeAnalysisIgnoreBuiltInRules>
+    <BaseIntermediateOutputPath>obj\</BaseIntermediateOutputPath>
+    <BaseAddress>4194304</BaseAddress>
+    <RegisterForComInterop>False</RegisterForComInterop>
+    <Optimize>false</Optimize>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|AnyCPU'">
     <TargetFrameworkVersion>v2.0</TargetFrameworkVersion>
     <OutputPath>bin\Release\</OutputPath>
-    <DefineConstants>TRACE;MONO_disabled; MySQL_disabled; PostgreSQL_disabled; SQLite</DefineConstants>
+    <DefineConstants>TRACE;MONO; MySQL_disabled; PostgreSQL_disabled; SQLite</DefineConstants>
     <PlatformTarget>AnyCPU</PlatformTarget>
     <CodeAnalysisLogFile>bin\x86\Release\GMap.NET.Core.dll.CodeAnalysisLog.xml</CodeAnalysisLogFile>
     <CodeAnalysisUseTypeNameInSuppression>true</CodeAnalysisUseTypeNameInSuppression>
@@ -74,6 +76,9 @@
     <CodeAnalysisIgnoreBuiltInRuleSets>false</CodeAnalysisIgnoreBuiltInRuleSets>
     <CodeAnalysisRuleDirectories>;C:\Program Files (x86)\Microsoft Visual Studio 10.0\Team Tools\Static Analysis Tools\FxCop\\Rules</CodeAnalysisRuleDirectories>
     <CodeAnalysisIgnoreBuiltInRules>false</CodeAnalysisIgnoreBuiltInRules>
+    <BaseAddress>4194304</BaseAddress>
+    <RegisterForComInterop>False</RegisterForComInterop>
+    <Optimize>true</Optimize>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
     <Optimize>true</Optimize>
@@ -91,17 +96,18 @@
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <DebugSymbols>true</DebugSymbols>
     <OutputPath>bin\v4.0-Debug\</OutputPath>
-    <DefineConstants>NET40;TRACE;DEBUG;SQLite;MONO_disabled;MySQL_disabled;PostgreSQL_disabled</DefineConstants>
+    <DefineConstants>NET40;TRACE;DEBUG;SQLite;MONO;MySQL_disabled;PostgreSQL_disabled</DefineConstants>
     <DebugType>Full</DebugType>
     <PlatformTarget>AnyCPU</PlatformTarget>
     <GenerateSerializationAssemblies>Off</GenerateSerializationAssemblies>
     <ErrorReport>prompt</ErrorReport>
     <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+    <Optimize>false</Optimize>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'v4.0-Release|AnyCPU'">
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <OutputPath>bin\v4.0-Release\</OutputPath>
-    <DefineConstants>NET40;TRACE;SQLite;MONO_disabled;MySQL_disabled;PostgreSQL_disabled</DefineConstants>
+    <DefineConstants>NET40;TRACE;SQLite;MONO;MySQL_disabled;PostgreSQL_disabled</DefineConstants>
     <Optimize>true</Optimize>
     <PlatformTarget>AnyCPU</PlatformTarget>
     <GenerateSerializationAssemblies>Off</GenerateSerializationAssemblies>
@@ -132,7 +138,7 @@
     <TargetFrameworkVersionNumber>5.0</TargetFrameworkVersionNumber>
   </PropertyGroup>
   <Choose>
-    <When Condition=" '$(TargetFrameworkVersionNumber)' &gt;= '4.0' ">
+    <When Condition=" '$(TargetFrameworkVersionNumber)' == '4.0' ">
       <ItemGroup>
         <Reference Include="Mono.Data.Sqlite">
           <HintPath>..\References\Windows\NET4\Mono.Data.Sqlite.dll</HintPath>
@@ -187,16 +193,11 @@
   </Choose>
   <ItemGroup>
     <Reference Include="System" />
-    <Reference Include="System.Data">
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="System.Data.SqlServerCe">
-      <SpecificVersion>False</SpecificVersion>
-      <Private>False</Private>
-    </Reference>
+    <Reference Include="System.Data" />
+    <Reference Include="System.Data.SqlServerCe" />
     <Reference Include="System.EnterpriseServices" />
     <Reference Include="System.Web.Services" />
-    <Reference Include="System.XML" />
+    <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="GMap.NET.CacheProviders\MemoryCache.cs" />
@@ -299,7 +300,6 @@
     <Compile Include="GMap.NET\RoutingProvider.cs" />
     <Compile Include="GMap.NET\ZipStorer.cs" />
     <Compile Include="Properties\VersionInfo.cs" />
-    <Compile Include="GMap.NET.CacheProviders\MsSQLCePureImageCache.cs" />
     <Compile Include="GMap.NET.CacheProviders\PostgreSQLPureImageCache.cs" />
     <Compile Include="GMap.NET.CacheProviders\SQLitePureImageCache.cs" />
     <Compile Include="GMap.NET.Internals\CacheQueueItem.cs" />
@@ -329,7 +329,6 @@
     <Compile Include="GMap.NET\Delegates.cs" />
     <Compile Include="GMap.NET\MapRoute.cs" />
     <None Include="GMap.NET\MapType.cs" />
-    <Compile Include="GMap.NET.CacheProviders\MsSQLPureImageCache.cs" />
     <Compile Include="GMap.NET\GPoint.cs" />
     <Compile Include="GMap.NET\PureImageCache.cs" />
     <Compile Include="GMap.NET\GRect.cs" />
@@ -354,6 +353,8 @@
     <Compile Include="GMap.NET\SizeLatLng.cs" />
     <Compile Include="GMap.NET.Internals\Stuff.cs" />
     <Service Include="{94E38DFF-614B-4cbd-B67C-F211BB35CE8B}" />
+    <Compile Include="GMap.NET.CacheProviders\MSSQLCEPureImageCache.cs" />
+    <Compile Include="GMap.NET.CacheProviders\MSSQLPureImageCache.cs" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Properties\Resources.resx">
