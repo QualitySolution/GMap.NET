@@ -290,7 +290,7 @@ namespace GMap.NET.GtkSharp
         #endregion
     }
 
-    public delegate void RouteClick(GMapRoute item, MouseEventArgs e);
+    //public delegate void RouteClick(GMapRoute item, MouseEventArgs e);
     public delegate void RouteEnter(GMapRoute item);
     public delegate void RouteLeave(GMapRoute item);
 }

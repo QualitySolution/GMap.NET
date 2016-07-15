@@ -38,11 +38,11 @@ namespace GMap.NET.GtkSharp
                {
                   if(isVisibile)
                   {
-                     Control.HoldInvalidation = true;
-                     {
-                        ForceUpdate();
-                     }
-                     Control.Refresh();
+	                    Control.HoldInvalidation = true;
+	                    {
+	                        ForceUpdate();
+	                    }
+						Control.Refresh();
                   }
                   else
                   {                   

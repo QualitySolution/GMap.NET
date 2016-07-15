@@ -166,11 +166,7 @@ namespace GMap.NET.GtkSharp
          {
             if(ToolTip == null && !string.IsNullOrEmpty(value))
             {
-#if !PocketPC
                ToolTip = new GMapRoundedToolTip(this);
-#else
-               ToolTip = new GMapToolTip(this);
-#endif
             }
             toolTipText = value;
          }
@@ -339,7 +335,7 @@ namespace GMap.NET.GtkSharp
       #endregion
    }
 
-   public delegate void MarkerClick(GMapMarker item, MouseEventArgs e);
+   //public delegate void MarkerClick(GMapMarker item, MouseEventArgs e);
    public delegate void MarkerEnter(GMapMarker item);
    public delegate void MarkerLeave(GMapMarker item);
 

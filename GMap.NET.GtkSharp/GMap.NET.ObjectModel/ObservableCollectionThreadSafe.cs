@@ -30,15 +30,15 @@ namespace GMap.NET.ObjectModel
                foreach(NotifyCollectionChangedEventHandler handler in delegates)
                {
 #if !PocketPC
-                  System.Windows.Forms.Control dispatcherObject = handler.Target as System.Windows.Forms.Control;
+                  //System.Windows.Forms.Control dispatcherObject = handler.Target as System.Windows.Forms.Control;
 
                   // If the subscriber is a DispatcherObject and different thread
-                  if(dispatcherObject != null && dispatcherObject.InvokeRequired)
+                  //if(dispatcherObject != null && dispatcherObject.InvokeRequired)
                   {
                      // Invoke handler in the target dispatcher's thread
-                     dispatcherObject.Invoke(handler, this, e);
+                    // dispatcherObject.Invoke(handler, this, e);
                   }
-                  else // Execute handler as is 
+                //  else // Execute handler as is 
                   {
                      collectionChanged(this, e);
                   }

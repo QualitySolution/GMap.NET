@@ -1,49 +1,46 @@
-﻿
+﻿//using Gtk;
+using System;
+using System.ComponentModel;
+using System.Drawing;
+using System.Drawing.Drawing2D;
+using System.Drawing.Imaging;
+using System.IO;
+using System.Threading;
+using System.Windows.Forms;
+using GMap.NET;
+using GMap.NET.Internals;
+using GMap.NET.ObjectModel;
+using System.Diagnostics;
+using System.Drawing.Text;
+using GMap.NET.MapProviders;
+using System.Runtime.Serialization.Formatters.Binary;
+using GMap.NET.Projections;
+
 namespace GMap.NET.GtkSharp
 {
-    using System;
-    using System.ComponentModel;
-    using System.Drawing;
-    using System.Drawing.Drawing2D;
-    using System.Drawing.Imaging;
-    using System.IO;
-    using System.Threading;
-    using System.Windows.Forms;
-    using GMap.NET;
-    using GMap.NET.Internals;
-    using GMap.NET.ObjectModel;
-    using System.Diagnostics;
-    using System.Drawing.Text;
-    using GMap.NET.MapProviders;
 
-#if !PocketPC
-    using System.Runtime.Serialization.Formatters.Binary;
-    using System.Collections.Generic;
-    using GMap.NET.Projections;
-#else
-   using OpenNETCF.ComponentModel;
-#endif
 
     /// <summary>
     /// GMap.NET control for Windows Forms
-    /// </summary>   
-    public partial class GMapControl : UserControl, Interface
+    /// </summary>
+	[System.ComponentModel.ToolboxItem (true)]
+	public partial class GMapControl :  Gtk.DrawingArea, Interface
     {
 #if !PocketPC
         /// <summary>
         /// occurs when clicked on marker
         /// </summary>
-        public event MarkerClick OnMarkerClick;
+        //public event MarkerClick OnMarkerClick;
 
         /// <summary>
         /// occurs when clicked on polygon
         /// </summary>
-        public event PolygonClick OnPolygonClick;
+        //public event PolygonClick OnPolygonClick;
 
         /// <summary>
         /// occurs when clicked on route
         /// </summary>
-        public event RouteClick OnRouteClick;
+        //public event RouteClick OnRouteClick;
 
         /// <summary>
         /// occurs on mouse enters route area
@@ -162,26 +159,16 @@ namespace GMap.NET.GtkSharp
         /// <summary>
         /// pen for empty tile borders
         /// </summary>
-#if !PocketPC
         public Pen EmptyTileBorders = new Pen(Brushes.White, 1);
-#else
-      public Pen EmptyTileBorders = new Pen(Color.White, 1);
-#endif
 
         public bool ShowCenter = true;
 
         /// <summary>
         /// pen for scale info
         /// </summary>
-#if !PocketPC
         public Pen ScalePen = new Pen(Brushes.Blue, 1);
         public Pen CenterPen = new Pen(Brushes.Red, 1);
-#else
-      public Pen ScalePen = new Pen(Color.Blue, 1);
-      public Pen CenterPen = new Pen(Color.Red, 1);
-#endif
 
-#if !PocketPC
         /// <summary>
         /// area selection pen
         /// </summary>
@@ -243,34 +230,32 @@ namespace GMap.NET.GtkSharp
         public Pen HelperLinePen = new Pen(Color.Blue, 1);
         bool renderHelperLine = false;
 
-        protected override void OnKeyDown(KeyEventArgs e)
+		protected override bool OnKeyPressEvent(Gdk.EventKey e)
         {
-            base.OnKeyDown(e);
-            
             if (HelperLineOption == HelperLineOptions.ShowOnModifierKey)
             {
-                renderHelperLine = (e.Modifiers == Keys.Shift || e.Modifiers == Keys.Alt);
+				renderHelperLine = (e.State.HasFlag(Gdk.ModifierType.ShiftMask) || e.State.HasFlag(Gdk.ModifierType.Mod1Mask)); // Mod1Mask == Altkey
                 if (renderHelperLine)
                 {
                     Invalidate();
                 }
-            }            
+            }
+
+			return base.OnKeyPressEvent(e);
         }
 
-        protected override void OnKeyUp(KeyEventArgs e)
+		protected override bool OnKeyReleaseEvent(Gdk.EventKey e)
         {
-            base.OnKeyUp(e);
-            
-            if (HelperLineOption == HelperLineOptions.ShowOnModifierKey)
+			if (HelperLineOption == HelperLineOptions.ShowOnModifierKey)
             {
-                renderHelperLine = (e.Modifiers == Keys.Shift || e.Modifiers == Keys.Alt);
+				renderHelperLine = (e.State.HasFlag(Gdk.ModifierType.ShiftMask) || e.State.HasFlag(Gdk.ModifierType.Mod1Mask)); // Mod1Mask == Altkey
                 if (!renderHelperLine)
                 {
                     Invalidate();
                 }
-            }            
+            }
+			return base.OnKeyReleaseEvent(e);
         }
-#endif
 
         Brush EmptytileBrush = new SolidBrush(Color.Navy);
         Color emptyTileColor = Color.Navy;
@@ -301,12 +286,6 @@ namespace GMap.NET.GtkSharp
                 }
             }
         }
-
-#if PocketPC
-      readonly Brush TileGridLinesTextBrush = new SolidBrush(Color.Red);
-      readonly Brush TileGridMissingTextBrush = new SolidBrush(Color.White);
-      readonly Brush CopyrightBrush = new SolidBrush(Color.Navy);
-#endif
 
         /// <summary>
         /// show map scale info
@@ -360,7 +339,7 @@ namespace GMap.NET.GtkSharp
         /// map dragg button
         /// </summary>
         [Category("GMap.NET")]
-        public MouseButtons DragButton = MouseButtons.Right;
+		public uint DragButton = 3; //Right button
 
         private bool showTileGridLines = false;
 
@@ -413,12 +392,9 @@ namespace GMap.NET.GtkSharp
         /// <summary>
         /// enables integrated DoubleBuffer for running on windows mobile
         /// </summary>
-#if !PocketPC
+		//FIXME Убрать полностью мобильную версию.
         public bool ForceDoubleBuffer = false;
         readonly bool MobileMode = false;
-#else
-      readonly bool ForceDoubleBuffer = true;
-#endif
 
         /// <summary>
         /// stops immediate marker/route/polygon invalidations;
@@ -429,7 +405,7 @@ namespace GMap.NET.GtkSharp
         /// <summary>
         /// call this to stop HoldInvalidation and perform single forced instant refresh 
         /// </summary>
-        public override void Refresh()
+        public void Refresh()
         {
             HoldInvalidation = false;
 
@@ -438,21 +414,22 @@ namespace GMap.NET.GtkSharp
                 Core.lastInvalidation = DateTime.Now;
             }
 
-            base.Refresh();
+			#if DEBUG
+			Console.WriteLine(String.Format("Tread: {0}", System.Threading.Thread.CurrentThread.ManagedThreadId));
+			#endif
+			base.QueueDraw();
         }
 
-#if !DESIGN
         /// <summary>
         /// enque built-in thread safe invalidation
         /// </summary>
-        public new void Invalidate()
+        public void Invalidate()
         {
-            if (Core.Refresh != null)
+			if (Core.Refresh != null)
             {
                 Core.Refresh.Set();
             }
         }
-#endif
 
 #if !PocketPC
         private bool _GrayScale = false;
@@ -516,11 +493,7 @@ namespace GMap.NET.GtkSharp
         internal readonly Core Core = new Core();
 
         internal readonly Font CopyrightFont = new Font(FontFamily.GenericSansSerif, 7, FontStyle.Regular);
-#if !PocketPC
         internal readonly Font MissingDataFont = new Font(FontFamily.GenericSansSerif, 11, FontStyle.Bold);
-#else
-      internal readonly Font MissingDataFont = new Font(FontFamily.GenericSansSerif, 8, FontStyle.Regular);
-#endif
         Font ScaleFont = new Font(FontFamily.GenericSansSerif, 5, FontStyle.Italic);
         internal readonly StringFormat CenterFormat = new StringFormat();
         internal readonly StringFormat BottomFormat = new StringFormat();
@@ -531,29 +504,39 @@ namespace GMap.NET.GtkSharp
         Bitmap backBuffer;
         Graphics gxOff;
 
+		#if DEBUG
+		public Thread GuiThread; //Only for Debug
+		#endif
+
 #if !DESIGN
         /// <summary>
         /// construct
         /// </summary>
         public GMapControl()
         {
-#if !PocketPC
-            if (!IsDesignerHosted)
-#endif
+		#if DEBUG
+			GuiThread = Thread.CurrentThread;
+			Console.WriteLine(String.Format("Tread: {0}", System.Threading.Thread.CurrentThread.ManagedThreadId));
+		#endif
+			if (!IsDesignerHosted)
             {
-#if !PocketPC
-                this.SetStyle(ControlStyles.OptimizedDoubleBuffer, true);
-                this.SetStyle(ControlStyles.AllPaintingInWmPaint, true);
-                this.SetStyle(ControlStyles.UserPaint, true);
-                this.SetStyle(ControlStyles.Opaque, true);
-                ResizeRedraw = true;
+				AddEvents ((int) Gdk.EventMask.ButtonPressMask);
+				AddEvents ((int) Gdk.EventMask.ButtonReleaseMask);
+				AddEvents ((int) Gdk.EventMask.PointerMotionMask);
+				AddEvents ((int) Gdk.EventMask.ScrollMask);
+
+				//this.SetStyle(ControlStyles.OptimizedDoubleBuffer, true);
+                //this.SetStyle(ControlStyles.AllPaintingInWmPaint, true);
+                //this.SetStyle(ControlStyles.UserPaint, true);
+                //this.SetStyle(ControlStyles.Opaque, true);
+                //ResizeRedraw = true;
 
                 TileFlipXYAttributes.SetWrapMode(WrapMode.TileFlipXY);
 
                 // only one mode will be active, to get mixed mode create new ColorMatrix
                 GrayScaleMode = GrayScaleMode;
                 NegativeMode = NegativeMode;
-#endif
+
                 Core.SystemType = "WindowsForms";
 
                 RenderMode = RenderMode.GDI_PLUS;
@@ -563,9 +546,7 @@ namespace GMap.NET.GtkSharp
 
                 BottomFormat.Alignment = StringAlignment.Center;
 
-#if !PocketPC
                 BottomFormat.LineAlignment = StringAlignment.Far;
-#endif
 
                 if (GMaps.Instance.IsRunningOnMono)
                 {
@@ -581,20 +562,13 @@ namespace GMap.NET.GtkSharp
 
         static GMapControl()
         {
-#if !PocketPC
-            if (!IsDesignerHosted)
-#endif
-            {
-                GMapImageProxy.Enable();
-#if !PocketPC
-                GMaps.Instance.SQLitePing();
-#endif
-            }
+       		GMapImageProxy.Enable();
+        	GMaps.Instance.SQLitePing();
         }
 
         void Overlays_CollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
         {
-            if (e.NewItems != null)
+			if (e.NewItems != null)
             {
                 foreach (GMapOverlay obj in e.NewItems)
                 {
@@ -613,7 +587,10 @@ namespace GMap.NET.GtkSharp
 
         void invalidatorEngage(object sender, ProgressChangedEventArgs e)
         {
-            base.Invalidate();
+			Console.WriteLine(String.Format("Get invaladation from Tread: {0}", System.Threading.Thread.CurrentThread.ManagedThreadId));
+			Gtk.Application.Invoke(delegate {
+				base.QueueDraw();
+			});
         }
 
         /// <summary>
@@ -621,7 +598,8 @@ namespace GMap.NET.GtkSharp
         /// </summary>
         internal void ForceUpdateOverlays()
         {
-            try
+			Console.WriteLine(String.Format("Tread: {0}", System.Threading.Thread.CurrentThread.ManagedThreadId));
+			try
             {
                 HoldInvalidation = true;
 
@@ -986,7 +964,7 @@ namespace GMap.NET.GtkSharp
                 }
 
                 Refresh();                
-                Application.DoEvents();
+               // Application.DoEvents();
 
                 using (MemoryStream ms = new MemoryStream())
                 {
@@ -1025,8 +1003,6 @@ namespace GMap.NET.GtkSharp
         /// <param name="y"></param>
         public void Offset(int x, int y)
         {
-            if (IsHandleCreated)
-            {
 #if !PocketPC
                 if (IsRotated)
                 {
@@ -1039,7 +1015,6 @@ namespace GMap.NET.GtkSharp
                 Core.DragOffset(new GPoint(x, y));
 
                 ForceUpdateOverlays();
-            }
         }
 
         #region UserControl Events
@@ -1047,9 +1022,9 @@ namespace GMap.NET.GtkSharp
 #if !PocketPC
         public readonly static bool IsDesignerHosted = LicenseManager.UsageMode == LicenseUsageMode.Designtime;
 
-        protected override void OnLoad(EventArgs e)
+		protected override void OnShown() // OnLoad
         {
-            base.OnLoad(e);
+			base.OnShown();
 
             if (!IsDesignerHosted)
             {
@@ -1103,7 +1078,7 @@ namespace GMap.NET.GtkSharp
 #endif
 
 #if !PocketPC
-        protected override void OnCreateControl()
+		/*    protected override void OnCreateControl()
         {
             base.OnCreateControl();
 
@@ -1131,39 +1106,35 @@ namespace GMap.NET.GtkSharp
             {
                 Manager.CancelTileCaching();
             }
-        }
+        }*/
 #endif
 
-        protected override void Dispose(bool disposing)
-        {
-            if (disposing)
+		public override void Destroy()
+		{
+            Core.OnMapClose();
+
+            Overlays.CollectionChanged -= new NotifyCollectionChangedEventHandler(Overlays_CollectionChanged);
+
+            foreach (var o in Overlays)
             {
-                Core.OnMapClose();
-
-                Overlays.CollectionChanged -= new NotifyCollectionChangedEventHandler(Overlays_CollectionChanged);
-
-                foreach (var o in Overlays)
-                {
-                    o.Dispose();
-                }
-                Overlays.Clear();
-
-                ScaleFont.Dispose();
-                ScalePen.Dispose();
-                CenterFormat.Dispose();
-                CenterPen.Dispose();
-                BottomFormat.Dispose();
-                CopyrightFont.Dispose();
-                EmptyTileBorders.Dispose();
-                EmptytileBrush.Dispose();
-
-#if !PocketPC
-                SelectedAreaFill.Dispose();
-                SelectionPen.Dispose();
-#endif
-                ClearBackBuffer();
+                o.Dispose();
             }
-            base.Dispose(disposing);
+            Overlays.Clear();
+
+            ScaleFont.Dispose();
+            ScalePen.Dispose();
+            CenterFormat.Dispose();
+            CenterPen.Dispose();
+            BottomFormat.Dispose();
+            CopyrightFont.Dispose();
+            EmptyTileBorders.Dispose();
+            EmptytileBrush.Dispose();
+
+            SelectedAreaFill.Dispose();
+            SelectionPen.Dispose();
+            ClearBackBuffer();
+
+			base.Destroy();
         }
 
         PointLatLng selectionStart;
@@ -1175,23 +1146,27 @@ namespace GMap.NET.GtkSharp
 
         public Color EmptyMapBackground = Color.WhiteSmoke;
 
-#if !DESIGN
-        protected override void OnPaint(PaintEventArgs e)
-        {
-            if (ForceDoubleBuffer)
+		protected override bool OnExposeEvent(Gdk.EventExpose e)
+		{
+			Console.WriteLine(String.Format("Tread: {0}", System.Threading.Thread.CurrentThread.ManagedThreadId));
+			if (ForceDoubleBuffer)
             {
                 if (gxOff != null)
                 {
                     DrawGraphics(gxOff);
-                    e.Graphics.DrawImage(backBuffer, 0, 0);
+					throw new NotSupportedException();
+                    //e.Graphics.DrawImage(backBuffer, 0, 0);
                 }
             }
             else
             {
-                DrawGraphics(e.Graphics);
+				using (Graphics g = Gtk.DotNet.Graphics.FromDrawable(e.Window))
+				{
+					DrawGraphics(g);
+				}
             }
 
-            base.OnPaint(e);
+			return base.OnExposeEvent(e);
         }
 
         void DrawGraphics(Graphics g)
@@ -1199,13 +1174,12 @@ namespace GMap.NET.GtkSharp
             // render white background
             g.Clear(EmptyMapBackground);
 
-#if !PocketPC
             if (MapRenderTransform.HasValue)
             {
                 #region -- scale --
                 if (!MobileMode)
                 {
-                    var center = new GPoint(Width / 2, Height / 2);
+					var center = new GPoint(Allocation.Width / 2, Allocation.Height / 2);
                     var delta = center;
                     delta.OffsetNegative(Core.renderOffset);
                     var pos = center;
@@ -1228,9 +1202,7 @@ namespace GMap.NET.GtkSharp
                 #endregion
             }
             else
-#endif
             {
-#if !PocketPC
                 if (IsRotated)
                 {
                     #region -- rotation --
@@ -1254,20 +1226,16 @@ namespace GMap.NET.GtkSharp
                     #endregion
                 }
                 else
-#endif
                 {
-#if !PocketPC
                     if (!MobileMode)
                     {
                         g.TranslateTransform(Core.renderOffset.X, Core.renderOffset.Y);
                     }
-#endif
                     DrawMap(g);
                     OnPaintOverlays(g);
                 }
             }
         }
-#endif
 
         void DrawMap(Graphics g)
         {
@@ -1293,14 +1261,10 @@ namespace GMap.NET.GtkSharp
                         Core.tileRect.Location = tilePoint.PosPixel;
                         if (ForceDoubleBuffer)
                         {
-#if !PocketPC
                             if (MobileMode)
                             {
                                 Core.tileRect.Offset(Core.renderOffset);
                             }
-#else
-                            Core.tileRect.Offset(Core.renderOffset);
-#endif
                         }
                         Core.tileRect.OffsetNegative(Core.compensationOffset);
 
@@ -1322,7 +1286,6 @@ namespace GMap.NET.GtkSharp
 
                                             if (!img.IsParent)
                                             {
-#if !PocketPC
                                                 if (!MapRenderTransform.HasValue && !IsRotated)
                                                 {
                                                     g.DrawImage(img.Img, Core.tileRect.X, Core.tileRect.Y, Core.tileRect.Width, Core.tileRect.Height);
@@ -1331,11 +1294,7 @@ namespace GMap.NET.GtkSharp
                                                 {
                                                     g.DrawImage(img.Img, new Rectangle((int)Core.tileRect.X, (int)Core.tileRect.Y, (int)Core.tileRect.Width, (int)Core.tileRect.Height), 0, 0, Core.tileRect.Width, Core.tileRect.Height, GraphicsUnit.Pixel, TileFlipXYAttributes);
                                                 }
-#else
-                                                g.DrawImage(img.Img, (int) Core.tileRect.X, (int) Core.tileRect.Y);
-#endif
                                             }
-#if !PocketPC
                                             else
                                             {
                                                 // TODO: move calculations to loader thread
@@ -1344,12 +1303,10 @@ namespace GMap.NET.GtkSharp
 
                                                 g.DrawImage(img.Img, dst, srcRect.X, srcRect.Y, srcRect.Width, srcRect.Height, GraphicsUnit.Pixel, TileFlipXYAttributes);
                                             }
-#endif
                                         }
                                     }
                                 }
                             }
-#if !PocketPC
                             else if (FillEmptyTiles && MapProvider.Projection is MercatorProjection)
                             {
                                 #region -- fill empty lines --
@@ -1388,7 +1345,6 @@ namespace GMap.NET.GtkSharp
                                 }
                                 #endregion
                             }
-#endif
                             // add text if tile is missing
                             if (!found)
                             {
@@ -1398,20 +1354,12 @@ namespace GMap.NET.GtkSharp
                                     if (Core.FailedLoads.ContainsKey(lt))
                                     {
                                         var ex = Core.FailedLoads[lt];
-#if !PocketPC
+
                                         g.FillRectangle(EmptytileBrush, new RectangleF(Core.tileRect.X, Core.tileRect.Y, Core.tileRect.Width, Core.tileRect.Height));
 
                                         g.DrawString("Exception: " + ex.Message, MissingDataFont, Brushes.Red, new RectangleF(Core.tileRect.X + 11, Core.tileRect.Y + 11, Core.tileRect.Width - 11, Core.tileRect.Height - 11));
 
                                         g.DrawString(EmptyTileText, MissingDataFont, Brushes.Blue, new RectangleF(Core.tileRect.X, Core.tileRect.Y, Core.tileRect.Width, Core.tileRect.Height), CenterFormat);
-
-#else
-                              g.FillRectangle(EmptytileBrush, new System.Drawing.Rectangle((int) Core.tileRect.X, (int) Core.tileRect.Y, (int) Core.tileRect.Width, (int) Core.tileRect.Height));
-
-                              g.DrawString("Exception: " + ex.Message, MissingDataFont, TileGridMissingTextBrush, new RectangleF(Core.tileRect.X + 11, Core.tileRect.Y + 11, Core.tileRect.Width - 11, Core.tileRect.Height - 11));
-
-                              g.DrawString(EmptyTileText, MissingDataFont, TileGridMissingTextBrush, new RectangleF(Core.tileRect.X, Core.tileRect.Y + Core.tileRect.Width / 2 + (ShowTileGridLines ? 11 : -22), Core.tileRect.Width, Core.tileRect.Height), BottomFormat);
-#endif
 
                                         g.DrawRectangle(EmptyTileBorders, (int)Core.tileRect.X, (int)Core.tileRect.Y, (int)Core.tileRect.Width, (int)Core.tileRect.Height);
                                     }
@@ -1422,11 +1370,7 @@ namespace GMap.NET.GtkSharp
                             {
                                 g.DrawRectangle(EmptyTileBorders, (int)Core.tileRect.X, (int)Core.tileRect.Y, (int)Core.tileRect.Width, (int)Core.tileRect.Height);
                                 {
-#if !PocketPC
                                     g.DrawString((tilePoint.PosXY == Core.centerTileXYLocation ? "CENTER: " : "TILE: ") + tilePoint, MissingDataFont, Brushes.Red, new RectangleF(Core.tileRect.X, Core.tileRect.Y, Core.tileRect.Width, Core.tileRect.Height), CenterFormat);
-#else
-                                    g.DrawString((tilePoint.PosXY == Core.centerTileXYLocation ? "" : "TILE: ") + tilePoint, MissingDataFont, TileGridLinesTextBrush, new RectangleF(Core.tileRect.X, Core.tileRect.Y, Core.tileRect.Width, Core.tileRect.Height), CenterFormat);
-#endif
                                 }
                             }
                         }
@@ -1446,6 +1390,14 @@ namespace GMap.NET.GtkSharp
         /// <param name="g"></param>
         protected virtual void OnPaintOverlays(Graphics g)
         {
+			#if DEBUG
+			if(GuiThread != Thread.CurrentThread)
+			{
+				Debug.WriteLine("Paint from not Gui thread.");
+				return;
+			}
+			#endif
+
 #if !PocketPC
             g.SmoothingMode = SmoothingMode.HighQuality;
 #endif
@@ -1459,17 +1411,11 @@ namespace GMap.NET.GtkSharp
 
             // center in virtual space...
 #if DEBUG
-#if !PocketPC
             if (!IsRotated)
-#endif
             {
                 g.DrawLine(ScalePen, -20, 0, 20, 0);
                 g.DrawLine(ScalePen, 0, -20, 0, 20);
-#if PocketPC
-              g.DrawString("debug build", CopyrightFont, CopyrightBrush, 2, CopyrightFont.Size);
-#else
                 g.DrawString("debug build", CopyrightFont, Brushes.Blue, 2, CopyrightFont.Height);
-#endif
             }
 #endif
 
@@ -1496,27 +1442,24 @@ namespace GMap.NET.GtkSharp
 
             if (renderHelperLine)
             {
-                var p = PointToClient(Form.MousePosition);
+				int mouseX, mouseY;
+				base.GetPointer(out mouseX, out mouseY);
 
-                g.DrawLine(HelperLinePen, p.X, 0, p.X, Height);
-                g.DrawLine(HelperLinePen, 0, p.Y, Width, p.Y);
+				g.DrawLine(HelperLinePen, mouseX, 0, mouseX, Allocation.Height);
+				g.DrawLine(HelperLinePen, 0, mouseY, Allocation.Width, mouseY);
             }
 #endif
             if (ShowCenter)
             {
-                g.DrawLine(CenterPen, Width / 2 - 5, Height / 2, Width / 2 + 5, Height / 2);
-                g.DrawLine(CenterPen, Width / 2, Height / 2 - 5, Width / 2, Height / 2 + 5);
+				g.DrawLine(CenterPen, Allocation.Width / 2 - 5, Allocation.Height / 2, Allocation.Width / 2 + 5, Allocation.Height / 2);
+				g.DrawLine(CenterPen, Allocation.Width / 2, Allocation.Height / 2 - 5, Allocation.Width / 2, Allocation.Height / 2 + 5);
             }
 
             #region -- copyright --
 
             if (!string.IsNullOrEmpty(Core.provider.Copyright))
             {
-#if !PocketPC
-                g.DrawString(Core.provider.Copyright, CopyrightFont, Brushes.Navy, 3, Height - CopyrightFont.Height - 5);
-#else
-            g.DrawString(Core.provider.Copyright, CopyrightFont, CopyrightBrush, 3, Height - CopyrightFont.Size - 15);
-#endif
+				g.DrawString(Core.provider.Copyright, CopyrightFont, Brushes.Navy, 3, Allocation.Height - CopyrightFont.Height - 5);
             }
 
             #endregion
@@ -1525,32 +1468,32 @@ namespace GMap.NET.GtkSharp
 #if !PocketPC
             if (MapScaleInfoEnabled)
             {
-                if (Width > Core.pxRes5000km)
+				if (Allocation.Width > Core.pxRes5000km)
                 {
                     g.DrawRectangle(ScalePen, 10, 10, Core.pxRes5000km, 10);
                     g.DrawString("5000Km", ScaleFont, Brushes.Blue, Core.pxRes5000km + 10, 11);
                 }
-                if (Width > Core.pxRes1000km)
+				if (Allocation.Width > Core.pxRes1000km)
                 {
                     g.DrawRectangle(ScalePen, 10, 10, Core.pxRes1000km, 10);
                     g.DrawString("1000Km", ScaleFont, Brushes.Blue, Core.pxRes1000km + 10, 11);
                 }
-                if (Width > Core.pxRes100km && Zoom > 2)
+				if (Allocation.Width > Core.pxRes100km && Zoom > 2)
                 {
                     g.DrawRectangle(ScalePen, 10, 10, Core.pxRes100km, 10);
                     g.DrawString("100Km", ScaleFont, Brushes.Blue, Core.pxRes100km + 10, 11);
                 }
-                if (Width > Core.pxRes10km && Zoom > 5)
+				if (Allocation.Width > Core.pxRes10km && Zoom > 5)
                 {
                     g.DrawRectangle(ScalePen, 10, 10, Core.pxRes10km, 10);
                     g.DrawString("10Km", ScaleFont, Brushes.Blue, Core.pxRes10km + 10, 11);
                 }
-                if (Width > Core.pxRes1000m && Zoom >= 10)
+				if (Allocation.Width > Core.pxRes1000m && Zoom >= 10)
                 {
                     g.DrawRectangle(ScalePen, 10, 10, Core.pxRes1000m, 10);
                     g.DrawString("1000m", ScaleFont, Brushes.Blue, Core.pxRes1000m + 10, 11);
                 }
-                if (Width > Core.pxRes100m && Zoom > 11)
+				if (Allocation.Width > Core.pxRes100m && Zoom > 11)
                 {
                     g.DrawRectangle(ScalePen, 10, 10, Core.pxRes100m, 10);
                     g.DrawString("100m", ScaleFont, Brushes.Blue, Core.pxRes100m + 9, 11);
@@ -1634,7 +1577,7 @@ namespace GMap.NET.GtkSharp
 
                     if (resize)
                     {
-                        Core.OnMapSizeChanged(Width, Height);
+						Core.OnMapSizeChanged(Allocation.Width, Allocation.Height);
                     }
 
                     if (!HoldInvalidation && Core.IsStarted)
@@ -1645,8 +1588,6 @@ namespace GMap.NET.GtkSharp
             }
         }
 #endif
-
-#if !PocketPC
 
         /// <summary>
         /// shrinks map area, useful just for testing
@@ -1665,21 +1606,17 @@ namespace GMap.NET.GtkSharp
             }
         }
 
-        protected override void OnSizeChanged(EventArgs e)
+		protected override void OnSizeAllocated(Gdk.Rectangle box)
         {
-            base.OnSizeChanged(e);
-#else
-      protected override void OnResize(EventArgs e)
-      {
-         base.OnResize(e);
-#endif
-            if (Width == 0 || Height == 0)
+			base.OnSizeAllocated(box);
+			Console.WriteLine(String.Format("Allocation Tread: {0}", System.Threading.Thread.CurrentThread.ManagedThreadId));
+            if (box.Width == 0 || box.Height == 0)
             {
                 Debug.WriteLine("minimized");
                 return;
             }
 
-            if (Width == Core.Width && Height == Core.Height)
+			if (box.Width == Core.Width && box.Height == Core.Height)
             {
                 Debug.WriteLine("maximized");
                 return;
@@ -1693,20 +1630,18 @@ namespace GMap.NET.GtkSharp
                 {
                     UpdateBackBuffer();
                 }
-
-#if !PocketPC
+					
                 if (VirtualSizeEnabled)
                 {
                     Core.OnMapSizeChanged(Core.vWidth, Core.vHeight);
                 }
                 else
-#endif
                 {
-                    Core.OnMapSizeChanged(Width, Height);
+					Core.OnMapSizeChanged(box.Width, box.Height);
                 }
                 //Core.currentRegion = new GRect(-50, -50, Core.Width + 50, Core.Height + 50);
 
-                if (Visible && IsHandleCreated && Core.IsStarted)
+                if (Visible && Core.IsStarted)
                 {
 #if !PocketPC
                     if (IsRotated)
@@ -1723,7 +1658,7 @@ namespace GMap.NET.GtkSharp
         {
             ClearBackBuffer();
 
-            backBuffer = new Bitmap(Width, Height);
+			backBuffer = new Bitmap(Allocation.Width, Allocation.Height);
             gxOff = Graphics.FromImage(backBuffer);
         }
 
@@ -1742,10 +1677,8 @@ namespace GMap.NET.GtkSharp
         }
 
         bool isSelected = false;
-        protected override void OnMouseDown(MouseEventArgs e)
+		protected override bool OnButtonPressEvent(Gdk.EventButton e)
         {
-            base.OnMouseDown(e);
-            
             if (!IsMouseOverMarker)
             {
 #if !PocketPC
@@ -1755,7 +1688,7 @@ namespace GMap.NET.GtkSharp
 #endif
                 {
 #if !PocketPC
-                    Core.mouseDown = ApplyRotationInversion(e.X, e.Y);
+					Core.mouseDown = ApplyRotationInversion((int)e.X, (int)e.Y);
 #else
                Core.mouseDown = new GPoint(e.X, e.Y);
 #endif
@@ -1766,15 +1699,14 @@ namespace GMap.NET.GtkSharp
                     isSelected = true;
                     SelectedArea = RectLatLng.Empty;
                     selectionEnd = PointLatLng.Empty;
-                    selectionStart = FromLocalToLatLng(e.X, e.Y);
+					selectionStart = FromLocalToLatLng((int)e.X, (int)e.Y);
                 }
             }
+			return base.OnButtonPressEvent(e);
         }
 
-        protected override void OnMouseUp(MouseEventArgs e)
+		protected override bool OnButtonReleaseEvent(Gdk.EventButton e)
         {
-            base.OnMouseUp(e);
-
             if (isSelected)
             {
                 isSelected = false;
@@ -1787,8 +1719,9 @@ namespace GMap.NET.GtkSharp
                     isDragging = false;
                     Debug.WriteLine("IsDragging = " + isDragging);
 #if !PocketPC
-                    this.Cursor = cursorBefore;
-                    cursorBefore = null;
+					currentCursorType = Gdk.CursorType.LeftPtr;
+					this.GdkWindow.Cursor = new Gdk.Cursor(currentCursorType);
+                    
 #endif
                 }
                 Core.EndDrag();
@@ -1813,7 +1746,7 @@ namespace GMap.NET.GtkSharp
                 {
                     bool zoomtofit = false;
 
-                    if (!SelectedArea.IsEmpty && Form.ModifierKeys == Keys.Shift)
+					if (!SelectedArea.IsEmpty && e.State.HasFlag(Gdk.ModifierType.ShiftMask))
                     {
                         zoomtofit = SetZoomToFitRect(SelectedArea);
                     }
@@ -1829,9 +1762,10 @@ namespace GMap.NET.GtkSharp
                 }
 #endif
             }
+			return base.OnButtonReleaseEvent(e);
         }
 
-#if !PocketPC
+/*#if !PocketPC
         protected override void OnMouseClick(MouseEventArgs e)
         {
             base.OnMouseClick(e);
@@ -1920,7 +1854,7 @@ namespace GMap.NET.GtkSharp
             //   base.Invalidate();
             //}            
         }
-#endif
+#endif*/
 #if !PocketPC
         /// <summary>
         /// apply transformation if in rotation mode
@@ -1962,30 +1896,20 @@ namespace GMap.NET.GtkSharp
             return ret;
         }
 
-        Cursor cursorBefore = Cursors.Default;
+		Gdk.CursorType currentCursorType;
 #endif
 
         /// <summary>
         /// Gets the width and height of a rectangle centered on the point the mouse
         /// button was pressed, within which a drag operation will not begin.
         /// </summary>
-#if !PocketPC
-        public Size DragSize = SystemInformation.DragSize;
-#else
       public Size DragSize = new Size(4, 4);
-#endif
 
-        protected override void OnMouseMove(MouseEventArgs e)
-        {
-            base.OnMouseMove(e);
-            
+		protected override bool OnMotionNotifyEvent(Gdk.EventMotion e)
+        {   
             if (!Core.IsDragging && !Core.mouseDown.IsEmpty)
             {
-#if PocketPC
-            GPoint p = new GPoint(e.X, e.Y);
-#else
-                GPoint p = ApplyRotationInversion(e.X, e.Y);
-#endif
+				GPoint p = ApplyRotationInversion((int)e.X, (int)e.Y);
                 if (Math.Abs(p.X - Core.mouseDown.X) * 2 >= DragSize.Width || Math.Abs(p.Y - Core.mouseDown.Y) * 2 >= DragSize.Height)
                 {
                     Core.BeginDrag(Core.mouseDown);
@@ -2000,8 +1924,8 @@ namespace GMap.NET.GtkSharp
                     Debug.WriteLine("IsDragging = " + isDragging);
 
 #if !PocketPC
-                    cursorBefore = this.Cursor;
-                    this.Cursor = Cursors.SizeAll;
+					currentCursorType = Gdk.CursorType.Fleur;
+					this.GdkWindow.Cursor = new Gdk.Cursor(currentCursorType);
 #endif
                 }
 
@@ -2012,7 +1936,7 @@ namespace GMap.NET.GtkSharp
                 else
                 {
 #if !PocketPC
-                    Core.mouseCurrent = ApplyRotationInversion(e.X, e.Y);
+					Core.mouseCurrent = ApplyRotationInversion((int)e.X, (int)e.Y);
 #else
                Core.mouseCurrent = new GPoint(e.X, e.Y);
 #endif
@@ -2025,15 +1949,15 @@ namespace GMap.NET.GtkSharp
 #else
                ForceUpdateOverlays();
 #endif
-                    base.Invalidate();
+					base.QueueDraw();
                 }
             }
             else
             {
 #if !PocketPC
-                if (isSelected && !selectionStart.IsEmpty && (Form.ModifierKeys == Keys.Alt || Form.ModifierKeys == Keys.Shift || DisableAltForSelection))
+				if (isSelected && !selectionStart.IsEmpty && (e.State.HasFlag(Gdk.ModifierType.ShiftMask) || e.State.HasFlag(Gdk.ModifierType.Mod1Mask) || DisableAltForSelection))
                 {
-                    selectionEnd = FromLocalToLatLng(e.X, e.Y);
+					selectionEnd = FromLocalToLatLng((int)e.X, (int)e.Y);
                     {
                         GMap.NET.PointLatLng p1 = selectionStart;
                         GMap.NET.PointLatLng p2 = selectionEnd;
@@ -2061,7 +1985,7 @@ namespace GMap.NET.GtkSharp
                                     {
                                         #region -- check --
 
-                                        GPoint rp = new GPoint(e.X, e.Y);
+										GPoint rp = new GPoint((long)e.X, (long)e.Y);
 #if !PocketPC
                                         if (!MobileMode)
                                         {
@@ -2111,7 +2035,7 @@ namespace GMap.NET.GtkSharp
                                     {
                                         #region -- check --
 
-                                        GPoint rp = new GPoint(e.X, e.Y);
+										GPoint rp = new GPoint((long)e.X, (long)e.Y);
 #if !PocketPC
                                         if (!MobileMode)
                                         {
@@ -2164,7 +2088,7 @@ namespace GMap.NET.GtkSharp
                                     {
                                         #region -- check --
 #if !PocketPC
-                                        GPoint rp = new GPoint(e.X, e.Y);
+										GPoint rp = new GPoint((long)e.X, (long)e.Y);
 
                                         if (!MobileMode)
                                         {
@@ -2219,31 +2143,32 @@ namespace GMap.NET.GtkSharp
 #if !PocketPC
                 if (renderHelperLine)
                 {
-                    base.Invalidate();
+					base.QueueDraw();
                 }
 #endif
             }
+			return base.OnMotionNotifyEvent(e);
         }
 
 #if !PocketPC
 
         internal void RestoreCursorOnLeave()
         {
-            if (overObjectCount <= 0 && cursorBefore != null)
+			if (overObjectCount <= 0 && currentCursorType != Gdk.CursorType.LeftPtr)
             {
                 overObjectCount = 0;
-                this.Cursor = this.cursorBefore;
-                cursorBefore = null;
+				currentCursorType = Gdk.CursorType.LeftPtr;
+				this.GdkWindow.Cursor = new Gdk.Cursor(currentCursorType);
             }
         }
 
         internal void SetCursorHandOnEnter()
         {
-            if (overObjectCount <= 0 && Cursor != Cursors.Hand)
+			if (overObjectCount <= 0 && currentCursorType != Gdk.CursorType.Hand1)
             {
                 overObjectCount = 0;
-                cursorBefore = this.Cursor;
-                this.Cursor = Cursors.Hand;
+				currentCursorType = Gdk.CursorType.Hand1;
+				this.GdkWindow.Cursor = new Gdk.Cursor(currentCursorType);
             }
         }
 
@@ -2252,23 +2177,13 @@ namespace GMap.NET.GtkSharp
         /// </summary>
         public bool DisableFocusOnMouseEnter = false;
 
-        protected override void OnMouseEnter(EventArgs e)
+		protected override bool OnEnterNotifyEvent(Gdk.EventCrossing e)
         {
-            base.OnMouseEnter(e);
-
             if (!DisableFocusOnMouseEnter)
             {
-                Focus();
+				GrabFocus();
             }
-            mouseIn = true;
-        }
-
-        bool mouseIn = false;
-
-        protected override void OnMouseLeave(EventArgs e)
-        {
-            base.OnMouseLeave(e);
-            mouseIn = false;
+			return base.OnEnterNotifyEvent(e);
         }
 
         /// <summary>
@@ -2281,29 +2196,27 @@ namespace GMap.NET.GtkSharp
         /// </summary>
         public bool IgnoreMarkerOnMouseWheel = false;
 
-        protected override void OnMouseWheel(MouseEventArgs e)
+		protected override bool OnScrollEvent(Gdk.EventScroll e)
         {
-            base.OnMouseWheel(e);
-
-            if (MouseWheelZoomEnabled && mouseIn && (!IsMouseOverMarker || IgnoreMarkerOnMouseWheel) && !Core.IsDragging)
+            if (MouseWheelZoomEnabled && (!IsMouseOverMarker || IgnoreMarkerOnMouseWheel) && !Core.IsDragging)
             {
-                if (Core.mouseLastZoom.X != e.X && Core.mouseLastZoom.Y != e.Y)
+				if (Core.mouseLastZoom.X != (int)e.X && Core.mouseLastZoom.Y != (int)e.Y)
                 {
                     if (MouseWheelZoomType == MouseWheelZoomType.MousePositionAndCenter)
                     {
-                        Core.position = FromLocalToLatLng(e.X, e.Y);
+						Core.position = FromLocalToLatLng((int)e.X, (int)e.Y);
                     }
                     else if (MouseWheelZoomType == MouseWheelZoomType.ViewCenter)
                     {
-                        Core.position = FromLocalToLatLng((int)Width / 2, (int)Height / 2);
+						Core.position = FromLocalToLatLng((int)Allocation.Width / 2, (int)Allocation.Height / 2);
                     }
                     else if (MouseWheelZoomType == MouseWheelZoomType.MousePositionWithoutCenter)
                     {
-                        Core.position = FromLocalToLatLng(e.X, e.Y);
+						Core.position = FromLocalToLatLng((int)e.X, (int)e.Y);
                     }
 
-                    Core.mouseLastZoom.X = e.X;
-                    Core.mouseLastZoom.Y = e.Y;
+					Core.mouseLastZoom.X = (int)e.X;
+					Core.mouseLastZoom.Y = (int)e.Y;
                 }
 
                 // set mouse position to map center
@@ -2311,14 +2224,15 @@ namespace GMap.NET.GtkSharp
                 {
                     if (!GMaps.Instance.IsRunningOnMono)
                     {
-                        System.Drawing.Point p = PointToScreen(new System.Drawing.Point(Width / 2, Height / 2));
-                        Stuff.SetCursorPos((int)p.X, (int)p.Y);
+                        //FIXME
+						//System.Drawing.Point p = PointToScreen(new System.Drawing.Point(Width / 2, Height / 2));
+                        //Stuff.SetCursorPos((int)p.X, (int)p.Y);
                     }
                 }
 
                 Core.MouseWheelZooming = true;
 
-                if (e.Delta > 0)
+				if (e.Direction == Gdk.ScrollDirection.Up)
                 {
                     if (!InvertedMouseWheelZooming)
                     {
@@ -2329,7 +2243,7 @@ namespace GMap.NET.GtkSharp
                         Zoom = ((int)(Zoom + 0.99)) - 1;
                     }
                 }
-                else if (e.Delta < 0)
+				else if (e.Direction == Gdk.ScrollDirection.Down)
                 {
                     if (!InvertedMouseWheelZooming)
                     {
@@ -2343,6 +2257,7 @@ namespace GMap.NET.GtkSharp
 
                 Core.MouseWheelZooming = false;
              }
+			return base.OnScrollEvent(e);
         }
 #endif
         #endregion
@@ -2422,8 +2337,8 @@ namespace GMap.NET.GtkSharp
 
                 if (VirtualSizeEnabled)
                 {
-                    f.X += (Width - Core.vWidth) / 2;
-                    f.Y += (Height - Core.vHeight) / 2;
+					f.X += (Allocation.Width - Core.vWidth) / 2;
+					f.Y += (Allocation.Height - Core.vHeight) / 2;
                 }
 
                 x = f.X;
@@ -2457,8 +2372,8 @@ namespace GMap.NET.GtkSharp
 
                 if (VirtualSizeEnabled)
                 {
-                    f.X += (Width - Core.vWidth) / 2;
-                    f.Y += (Height - Core.vHeight) / 2;
+					f.X += (Allocation.Width - Core.vWidth) / 2;
+					f.Y += (Allocation.Height - Core.vHeight) / 2;
                 }
 
                 ret.X = f.X;
@@ -2477,7 +2392,7 @@ namespace GMap.NET.GtkSharp
         /// <returns></returns>
         public bool ShowExportDialog()
         {
-            using (FileDialog dlg = new SaveFileDialog())
+/*            using (FileDialog dlg = new SaveFileDialog())
             {
                 dlg.CheckPathExists = true;
                 dlg.CheckFileExists = false;
@@ -2506,17 +2421,16 @@ namespace GMap.NET.GtkSharp
                     return ok;
                 }
             }
-
+*/
             return false;
         }
-
         /// <summary>
         /// shows map dbimport dialog
         /// </summary>
         /// <returns></returns>
         public bool ShowImportDialog()
         {
-            using (FileDialog dlg = new OpenFileDialog())
+/*            using (FileDialog dlg = new OpenFileDialog())
             {
                 dlg.CheckPathExists = true;
                 dlg.CheckFileExists = false;
@@ -2546,10 +2460,10 @@ namespace GMap.NET.GtkSharp
                     return ok;
                 }
             }
-
+*/
             return false;
         }
-#endif
+		#endif
 
         private ScaleModes scaleMode = ScaleModes.Integer;
 
@@ -2798,7 +2712,7 @@ namespace GMap.NET.GtkSharp
                 else if (Core.Provider.Projection != null)
                 {
                     var p = FromLocalToLatLng(0, 0);
-                    var p2 = FromLocalToLatLng(Width, Height);
+					var p2 = FromLocalToLatLng(Allocation.Width, Allocation.Height);
 
                     return RectLatLng.FromLTRB(p.Lng, p.Lat, p2.Lng, p2.Lat);
                 }

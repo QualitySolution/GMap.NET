@@ -6,18 +6,13 @@ namespace GMap.NET.GtkSharp
    using System.Drawing.Drawing2D;
    using System.Runtime.Serialization;
    using GMap.NET;
-   using System.Windows.Forms;
    using System;
 
    /// <summary>
    /// GMap.NET polygon
    /// </summary>
    [System.Serializable]
-#if !PocketPC
    public class GMapPolygon : MapRoute, ISerializable, IDeserializationCallback, IDisposable
-#else
-   public class GMapPolygon : MapRoute, IDisposable
-#endif
    {
       private bool visible = true;
 
@@ -47,9 +42,7 @@ namespace GMap.NET.GtkSharp
                       if (Overlay.Control.IsMouseOverPolygon)
                       {
                           Overlay.Control.IsMouseOverPolygon = false;
-#if !PocketPC
                           Overlay.Control.RestoreCursorOnLeave();
-#endif
                       }
                   }
 
@@ -346,7 +339,7 @@ namespace GMap.NET.GtkSharp
       #endregion
    }
 
-   public delegate void PolygonClick(GMapPolygon item, MouseEventArgs e);
+   //public delegate void PolygonClick(GMapPolygon item, MouseEventArgs e);
    public delegate void PolygonEnter(GMapPolygon item);
    public delegate void PolygonLeave(GMapPolygon item);
 }
