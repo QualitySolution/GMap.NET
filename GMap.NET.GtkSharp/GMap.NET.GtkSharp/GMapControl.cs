@@ -1140,11 +1140,11 @@ namespace GMap.NET.GtkSharp
         PointLatLng selectionStart;
         PointLatLng selectionEnd;
 
-#if !PocketPC
         float? MapRenderTransform = null;
-#endif
 
         public Color EmptyMapBackground = Color.WhiteSmoke;
+
+		public bool HasFrame { get; set;}
 
 		protected override bool OnExposeEvent(Gdk.EventExpose e)
 		{
@@ -1165,6 +1165,12 @@ namespace GMap.NET.GtkSharp
 					DrawGraphics(g);
 				}
             }
+
+			if(HasFrame)
+			{
+				var gc = new Gdk.GC(e.Window);
+				e.Window.DrawRectangle(gc, false, e.Area.X, e.Area.Y, e.Area.Width - 1, e.Area.Height - 1);
+			}
 
 			return base.OnExposeEvent(e);
         }
