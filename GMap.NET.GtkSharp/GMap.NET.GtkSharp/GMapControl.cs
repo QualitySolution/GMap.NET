@@ -1144,6 +1144,8 @@ namespace GMap.NET.GtkSharp
 
         public Color EmptyMapBackground = Color.WhiteSmoke;
 
+		[Category("GMap.NET")]
+		[Description("Widget has frame")]
 		public bool HasFrame { get; set;}
 
 		protected override bool OnExposeEvent(Gdk.EventExpose e)
