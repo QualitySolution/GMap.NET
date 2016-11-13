@@ -197,7 +197,7 @@ namespace GMap.NET.GtkSharp.Markers
 
       static readonly Dictionary<string, Bitmap> iconCache = new Dictionary<string, Bitmap>();
 
-      internal static Bitmap GetIcon(string name)
+		public static Bitmap GetIcon(string name)
       {
          Bitmap ret;
          if(!iconCache.TryGetValue(name, out ret))
