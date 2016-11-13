@@ -4,27 +4,14 @@ namespace GMap.NET.GtkSharp
    using System;
    using System.Drawing;
    using System.Runtime.Serialization;
-   using System.Windows.Forms;
    using GMap.NET.GtkSharp.ToolTips;
 
    /// <summary>
    /// GMap.NET marker
    /// </summary>
    [Serializable]
-#if !PocketPC
    public abstract class GMapMarker : ISerializable, IDisposable
-#else
-   public class GMapMarker: IDisposable
-#endif
    {
-#if PocketPC
-      static readonly System.Drawing.Imaging.ImageAttributes attr = new System.Drawing.Imaging.ImageAttributes();
-
-      static GMapMarker()
-      {
-         attr.SetColorKey(Color.White, Color.White);
-      }
-#endif
       GMapOverlay overlay;
       public GMapOverlay Overlay
       {
@@ -200,9 +187,7 @@ namespace GMap.NET.GtkSharp
                       if (Overlay.Control.IsMouseOverMarker)
                       {
                           Overlay.Control.IsMouseOverMarker = false;
-#if !PocketPC
                           Overlay.Control.RestoreCursorOnLeave();
-#endif
                       }
                   }
 
