@@ -91,8 +91,7 @@ namespace GMap.NET.GtkSharp
             overlay = value;
          }
       }
-
-#if !PocketPC
+			
       /// <summary>
       /// Indicates whether the specified point is contained within this System.Drawing.Drawing2D.GraphicsPath
       /// </summary>
@@ -139,12 +138,10 @@ namespace GMap.NET.GtkSharp
               }
           }
       }
-#endif
 
 
       public virtual void OnRender(Graphics g)
       {
-#if !PocketPC
          if(IsVisible)
          {
              if (IsVisible)
@@ -156,25 +153,6 @@ namespace GMap.NET.GtkSharp
                  }
              }            
          }
-#else
-         {
-            if(IsVisible)
-            {
-               Point[] pnts = new Point[LocalPoints.Count];
-               for(int i = 0; i < LocalPoints.Count; i++)
-               {
-                  Point p2 = new Point((int)LocalPoints[i].X, (int)LocalPoints[i].Y);
-                  pnts[pnts.Length - 1 - i] = p2;
-               }
-
-               if(pnts.Length > 1)
-               {
-                  g.FillPolygon(Fill, pnts);
-                  g.DrawPolygon(Stroke, pnts);
-               }
-            }
-         }
-#endif
       }
 
       //public double Area
@@ -185,11 +163,7 @@ namespace GMap.NET.GtkSharp
       //   }
       //}
 
-#if !PocketPC
       public static readonly Pen DefaultStroke = new Pen(Color.FromArgb(155, Color.MidnightBlue));
-#else
-      public static readonly Pen DefaultStroke = new Pen(Color.MidnightBlue);
-#endif
 
       /// <summary>
       /// specifies how the outline is painted
@@ -197,11 +171,7 @@ namespace GMap.NET.GtkSharp
       [NonSerialized]
       public Pen Stroke = DefaultStroke;
 
-#if !PocketPC
       public static readonly Brush DefaultFill = new SolidBrush(Color.FromArgb(155, Color.AliceBlue));
-#else
-      public static readonly Brush DefaultFill = new System.Drawing.SolidBrush(Color.AliceBlue);
-#endif
 
       /// <summary>
       /// background color
@@ -213,9 +183,7 @@ namespace GMap.NET.GtkSharp
 
       static GMapPolygon()
       {
-#if !PocketPC
           DefaultStroke.LineJoin = LineJoin.Round;
-#endif
           DefaultStroke.Width = 5;
       }
 
@@ -258,8 +226,7 @@ namespace GMap.NET.GtkSharp
          }
          return result;
       }
-
-#if !PocketPC
+			
       #region ISerializable Members
 
       /// <summary>
@@ -311,7 +278,6 @@ namespace GMap.NET.GtkSharp
       }
 
       #endregion
-#endif
 
       #region IDisposable Members
 
@@ -325,13 +291,11 @@ namespace GMap.NET.GtkSharp
 
             LocalPoints.Clear();            
 
-#if !PocketPC
             if (graphicsPath != null)
             {
                 graphicsPath.Dispose();
                 graphicsPath = null;
             }
-#endif
             base.Clear();
          }
       }
