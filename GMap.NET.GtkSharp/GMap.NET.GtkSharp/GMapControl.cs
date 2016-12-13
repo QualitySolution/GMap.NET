@@ -1,5 +1,4 @@
-﻿//using Gtk;
-using System;
+﻿using System;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Drawing;
@@ -25,7 +24,6 @@ namespace GMap.NET.GtkSharp
 	[System.ComponentModel.ToolboxItem (true)]
 	public partial class GMapControl :  Gtk.DrawingArea, Interface
     {
-#if !PocketPC
         /// <summary>
         /// occurs when clicked on marker
         /// </summary>
@@ -55,7 +53,6 @@ namespace GMap.NET.GtkSharp
         /// occurs when mouse selection is changed
         /// </summary>        
         public event SelectionChange OnSelectionChange;
-#endif
 
         /// <summary>
         /// occurs on mouse enters marker area
@@ -429,8 +426,7 @@ namespace GMap.NET.GtkSharp
                 Core.Refresh.Set();
             }
         }
-
-#if !PocketPC
+			
         private bool _GrayScale = false;
 
         [Category("GMap.NET")]
@@ -486,7 +482,6 @@ namespace GMap.NET.GtkSharp
                 }
             }
         }
-#endif
 
         // internal stuff
         internal readonly Core Core = new Core();
@@ -496,9 +491,7 @@ namespace GMap.NET.GtkSharp
         Font ScaleFont = new Font(FontFamily.GenericSansSerif, 5, FontStyle.Italic);
         internal readonly StringFormat CenterFormat = new StringFormat();
         internal readonly StringFormat BottomFormat = new StringFormat();
-#if !PocketPC
         readonly ImageAttributes TileFlipXYAttributes = new ImageAttributes();
-#endif
         double zoomReal;
         Bitmap backBuffer;
         Graphics gxOff;
@@ -624,12 +617,10 @@ namespace GMap.NET.GtkSharp
         {
             GPoint p = FromLatLngToLocal(marker.Position);
             {
-#if !PocketPC
                 if (!MobileMode)
                 {
                     p.OffsetNegative(Core.renderOffset);
                 }
-#endif
                 marker.LocalPosition = new System.Drawing.Point((int)(p.X + marker.Offset.X), (int)(p.Y + marker.Offset.Y));
             }
         }
@@ -646,17 +637,13 @@ namespace GMap.NET.GtkSharp
           {
                 GPoint p = FromLatLngToLocal(route.Points[i]);
 
-#if !PocketPC
                 if (!MobileMode)
                 {
                     p.OffsetNegative(Core.renderOffset);
                 }
-#endif
                 route.LocalPoints.Add(p);
             }
-#if !PocketPC
             route.UpdateGraphicsPath();
-#endif
         }
 
         /// <summary>
@@ -670,17 +657,13 @@ namespace GMap.NET.GtkSharp
           for (int i = 0; i < polygon.Points.Count; i++)
           {
                 GPoint p = FromLatLngToLocal(polygon.Points[i]);
-#if !PocketPC
                 if (!MobileMode)
                 {
                     p.OffsetNegative(Core.renderOffset);
                 }
-#endif
                 polygon.LocalPoints.Add(p);
             }
-#if !PocketPC
             polygon.UpdateGraphicsPath();
-#endif
         }
 
         /// <summary>
@@ -957,9 +940,7 @@ namespace GMap.NET.GtkSharp
 
                 if (!r)
                 {
-#if !PocketPC
                     ForceDoubleBuffer = true;
-#endif
                 }
 
                 Refresh();                
@@ -971,11 +952,7 @@ namespace GMap.NET.GtkSharp
                     {
                         frame.Save(ms, ImageFormat.Png);
                     }
-#if !PocketPC
                     ret = Image.FromStream(ms);
-#else
-                    ret = new Bitmap(ms);
-#endif
                 }
             }
             catch (Exception)
@@ -986,9 +963,7 @@ namespace GMap.NET.GtkSharp
             {
                 if (!r)
                 {
-#if !PocketPC
                     ForceDoubleBuffer = false;
-#endif
                     ClearBackBuffer();
                 }
             }
@@ -1002,7 +977,6 @@ namespace GMap.NET.GtkSharp
         /// <param name="y"></param>
         public void Offset(int x, int y)
         {
-#if !PocketPC
                 if (IsRotated)
                 {
                     System.Drawing.Point[] p = new System.Drawing.Point[] { new System.Drawing.Point(x, y) };
@@ -1010,7 +984,6 @@ namespace GMap.NET.GtkSharp
                     x = (int)p[0].X;
                     y = (int)p[0].Y;
                 }
-#endif
                 Core.DragOffset(new GPoint(x, y));
 
                 ForceUpdateOverlays();
@@ -1018,7 +991,6 @@ namespace GMap.NET.GtkSharp
 
         #region UserControl Events
 
-#if !PocketPC
         public readonly static bool IsDesignerHosted = LicenseManager.UsageMode == LicenseUsageMode.Designtime;
 
 		protected override void OnShown() // OnLoad
@@ -1049,34 +1021,7 @@ namespace GMap.NET.GtkSharp
                 //this.BeginInvoke(m);
             }
         }
-#else
-      //delegate void MethodInvoker();
-      bool IsHandleCreated = false;
-
-      protected override void OnPaintBackground(PaintEventArgs e)
-      {
-         if(!IsHandleCreated)
-         {
-            IsHandleCreated = true;
-
-            if(lazyEvents)
-            {
-               lazyEvents = false;
-
-               if(lazySetZoomToFitRect.HasValue)
-               {
-                  SetZoomToFitRect(lazySetZoomToFitRect.Value);
-                  lazySetZoomToFitRect = null;
-               }
-            }
-
-            Core.OnMapOpen().ProgressChanged += new ProgressChangedEventHandler(invalidatorEngage);
-            ForceUpdateOverlays();
-         }
-      }
-#endif
-
-#if !PocketPC
+			
 		/*    protected override void OnCreateControl()
         {
             base.OnCreateControl();
@@ -1106,7 +1051,6 @@ namespace GMap.NET.GtkSharp
                 Manager.CancelTileCaching();
             }
         }*/
-#endif
 
 		public override void Destroy()
 		{
@@ -1405,9 +1349,7 @@ namespace GMap.NET.GtkSharp
 			}
 			#endif
 
-#if !PocketPC
             g.SmoothingMode = SmoothingMode.HighQuality;
-#endif
             foreach (GMapOverlay o in Overlays)
             {
                 if (o.IsVisibile)
@@ -1425,8 +1367,6 @@ namespace GMap.NET.GtkSharp
                 g.DrawString("debug build", CopyrightFont, Brushes.Blue, 2, CopyrightFont.Height);
             }
 #endif
-
-#if !PocketPC
 
             if (!MobileMode)
             {
@@ -1455,7 +1395,6 @@ namespace GMap.NET.GtkSharp
 				g.DrawLine(HelperLinePen, mouseX, 0, mouseX, Allocation.Height);
 				g.DrawLine(HelperLinePen, 0, mouseY, Allocation.Width, mouseY);
             }
-#endif
             if (ShowCenter)
             {
 				g.DrawLine(CenterPen, Allocation.Width / 2 - 5, Allocation.Height / 2, Allocation.Width / 2 + 5, Allocation.Height / 2);
@@ -1472,7 +1411,6 @@ namespace GMap.NET.GtkSharp
             #endregion
 
             #region -- draw scale --
-#if !PocketPC
             if (MapScaleInfoEnabled)
             {
 				if (Allocation.Width > Core.pxRes5000km)
@@ -1506,11 +1444,9 @@ namespace GMap.NET.GtkSharp
                     g.DrawString("100m", ScaleFont, Brushes.Blue, Core.pxRes100m + 9, 11);
                 }
             }
-#endif
             #endregion
         }
 
-#if !PocketPC
         readonly Matrix rotationMatrix = new Matrix();
         readonly Matrix rotationMatrixInvert = new Matrix();
 
@@ -1594,7 +1530,6 @@ namespace GMap.NET.GtkSharp
                 }
             }
         }
-#endif
 
         /// <summary>
         /// shrinks map area, useful just for testing
@@ -1628,10 +1563,8 @@ namespace GMap.NET.GtkSharp
                 Debug.WriteLine("maximized");
                 return;
             }
-
-#if !PocketPC
+				
             if (!IsDesignerHosted)
-#endif
             {
                 if (ForceDoubleBuffer)
                 {
@@ -1650,12 +1583,10 @@ namespace GMap.NET.GtkSharp
 
                 if (Visible && Core.IsStarted)
                 {
-#if !PocketPC
                     if (IsRotated)
                     {
                         UpdateRotationMatrix();
                     }
-#endif
                     ForceUpdateOverlays();
                 }
             }
@@ -1688,17 +1619,9 @@ namespace GMap.NET.GtkSharp
         {
             if (!IsMouseOverMarker)
             {
-#if !PocketPC
                 if (e.Button == DragButton && CanDragMap)
-#else
-            if(CanDragMap)
-#endif
                 {
-#if !PocketPC
 					Core.mouseDown = ApplyRotationInversion((int)e.X, (int)e.Y);
-#else
-               Core.mouseDown = new GPoint(e.X, e.Y);
-#endif
                     this.Invalidate();
                 }
                 else if (!isSelected)
@@ -1725,11 +1648,8 @@ namespace GMap.NET.GtkSharp
                 {
                     isDragging = false;
                     Debug.WriteLine("IsDragging = " + isDragging);
-#if !PocketPC
 					currentCursorType = Gdk.CursorType.LeftPtr;
 					this.GdkWindow.Cursor = new Gdk.Cursor(currentCursorType);
-                    
-#endif
                 }
                 Core.EndDrag();
 
@@ -1743,7 +1663,6 @@ namespace GMap.NET.GtkSharp
             }
             else
             {
-#if !PocketPC
                 if (e.Button == DragButton)
                 {
                     Core.mouseDown = GPoint.Empty;
@@ -1767,7 +1686,6 @@ namespace GMap.NET.GtkSharp
                 {
                     Invalidate();
                 }
-#endif
             }
 			return base.OnButtonReleaseEvent(e);
         }
@@ -1862,8 +1780,8 @@ namespace GMap.NET.GtkSharp
             //}            
         }
 #endif*/
-#if !PocketPC
-        /// <summary>
+        
+		/// <summary>
         /// apply transformation if in rotation mode
         /// </summary>
         GPoint ApplyRotationInversion(int x, int y)
@@ -1904,7 +1822,6 @@ namespace GMap.NET.GtkSharp
         }
 
 		Gdk.CursorType currentCursorType;
-#endif
 
         /// <summary>
         /// Gets the width and height of a rectangle centered on the point the mouse
@@ -1930,10 +1847,8 @@ namespace GMap.NET.GtkSharp
                     isDragging = true;
                     Debug.WriteLine("IsDragging = " + isDragging);
 
-#if !PocketPC
 					currentCursorType = Gdk.CursorType.Fleur;
 					this.GdkWindow.Cursor = new Gdk.Cursor(currentCursorType);
-#endif
                 }
 
                 if (BoundsOfMap.HasValue && !BoundsOfMap.Value.Contains(Position))
@@ -1942,26 +1857,17 @@ namespace GMap.NET.GtkSharp
                 }
                 else
                 {
-#if !PocketPC
 					Core.mouseCurrent = ApplyRotationInversion((int)e.X, (int)e.Y);
-#else
-               Core.mouseCurrent = new GPoint(e.X, e.Y);
-#endif
                     Core.Drag(Core.mouseCurrent);
-#if !PocketPC
                     if (MobileMode || IsRotated)
                     {
                         ForceUpdateOverlays();
                     }
-#else
-               ForceUpdateOverlays();
-#endif
 					base.QueueDraw();
                 }
             }
             else
             {
-#if !PocketPC
 				if (isSelected && !selectionStart.IsEmpty && (e.State.HasFlag(Gdk.ModifierType.ShiftMask) || e.State.HasFlag(Gdk.ModifierType.Mod1Mask) || DisableAltForSelection))
                 {
 					selectionEnd = FromLocalToLatLng((int)e.X, (int)e.Y);
@@ -1978,7 +1884,6 @@ namespace GMap.NET.GtkSharp
                     }
                 }
                 else
-#endif
                     if (Core.mouseDown.IsEmpty)
                     {
                         for (int i = Overlays.Count - 1; i >= 0; i--)
@@ -1993,19 +1898,16 @@ namespace GMap.NET.GtkSharp
                                         #region -- check --
 
 										GPoint rp = new GPoint((long)e.X, (long)e.Y);
-#if !PocketPC
                                         if (!MobileMode)
                                         {
                                             rp.OffsetNegative(Core.renderOffset);
                                         }
-#endif
                                         if (m.LocalArea.Contains((int)rp.X, (int)rp.Y))
                                         {
                                             if (!m.IsMouseOver)
                                             {
-#if !PocketPC
                                                 SetCursorHandOnEnter();
-#endif
+
                                                 m.IsMouseOver = true;
                                                 IsMouseOverMarker = true;
 
@@ -2021,9 +1923,7 @@ namespace GMap.NET.GtkSharp
                                         {
                                             m.IsMouseOver = false;
                                             IsMouseOverMarker = false;
-#if !PocketPC
                                             RestoreCursorOnLeave();
-#endif
                                             if (OnMarkerLeave != null)
                                             {
                                                 OnMarkerLeave(m);
@@ -2034,8 +1934,7 @@ namespace GMap.NET.GtkSharp
                                         #endregion
                                     }
                                 }
-
-#if !PocketPC
+									
                                 foreach (GMapRoute m in o.Routes)
                                 {
                                     if (m.IsVisible && m.IsHitTestVisible)
@@ -2043,19 +1942,15 @@ namespace GMap.NET.GtkSharp
                                         #region -- check --
 
 										GPoint rp = new GPoint((long)e.X, (long)e.Y);
-#if !PocketPC
                                         if (!MobileMode)
                                         {
                                             rp.OffsetNegative(Core.renderOffset);
                                         }
-#endif
                                         if (m.IsInside((int)rp.X, (int)rp.Y))
                                         {
                                             if (!m.IsMouseOver)
                                             {
-#if !PocketPC
                                                 SetCursorHandOnEnter();
-#endif
                                                 m.IsMouseOver = true;
                                                 IsMouseOverRoute = true;
 
@@ -2073,9 +1968,7 @@ namespace GMap.NET.GtkSharp
                                             {
                                                 m.IsMouseOver = false;
                                                 IsMouseOverRoute = false;
-#if !PocketPC
                                                 RestoreCursorOnLeave();
-#endif
                                                 if (OnRouteLeave != null)
                                                 {
                                                     OnRouteLeave(m);
@@ -2087,14 +1980,12 @@ namespace GMap.NET.GtkSharp
                                         #endregion
                                     }
                                 }
-#endif
 
                                 foreach (GMapPolygon m in o.Polygons)
                                 {
                                     if (m.IsVisible && m.IsHitTestVisible)
                                     {
                                         #region -- check --
-#if !PocketPC
 										GPoint rp = new GPoint((long)e.X, (long)e.Y);
 
                                         if (!MobileMode)
@@ -2103,15 +1994,10 @@ namespace GMap.NET.GtkSharp
                                         }
 
                                         if (m.IsInsideLocal((int)rp.X, (int)rp.Y))
-#else
-                              if (m.IsInside(FromLocalToLatLng(e.X, e.Y)))
-#endif
                                         {
                                             if (!m.IsMouseOver)
                                             {
-#if !PocketPC
                                                 SetCursorHandOnEnter();
-#endif
                                                 m.IsMouseOver = true;
                                                 IsMouseOverPolygon = true;
 
@@ -2129,9 +2015,7 @@ namespace GMap.NET.GtkSharp
                                             {
                                                 m.IsMouseOver = false;
                                                 IsMouseOverPolygon = false;
-#if !PocketPC
                                                 RestoreCursorOnLeave();
-#endif
                                                 if (OnPolygonLeave != null)
                                                 {
                                                     OnPolygonLeave(m);
@@ -2146,18 +2030,14 @@ namespace GMap.NET.GtkSharp
                             }
                         }
                     }
-
-#if !PocketPC
+						
                 if (renderHelperLine)
                 {
 					base.QueueDraw();
                 }
-#endif
             }
 			return base.OnMotionNotifyEvent(e);
         }
-
-#if !PocketPC
 
         internal void RestoreCursorOnLeave()
         {
@@ -2266,7 +2146,6 @@ namespace GMap.NET.GtkSharp
              }
 			return base.OnScrollEvent(e);
         }
-#endif
         #endregion
 
         #region IGControl Members
@@ -2314,7 +2193,6 @@ namespace GMap.NET.GtkSharp
         /// <returns></returns>
         public PointLatLng FromLocalToLatLng(int x, int y)
         {
-#if !PocketPC
             if (MapRenderTransform.HasValue)
             {
                 //var xx = (int)(Core.renderOffset.X + ((x - Core.renderOffset.X) / MapRenderTransform.Value));
@@ -2351,7 +2229,6 @@ namespace GMap.NET.GtkSharp
                 x = f.X;
                 y = f.Y;
             }
-#endif
             return Core.FromLocalToLatLng(x, y);
         }
 
@@ -2364,7 +2241,6 @@ namespace GMap.NET.GtkSharp
         {
             GPoint ret = Core.FromLatLngToLocal(point);
 
-#if !PocketPC
             if (MapRenderTransform.HasValue)
             {
                 ret.X = (int)(Core.renderOffset.X + ((Core.renderOffset.X - ret.X) * -MapRenderTransform.Value));
@@ -2386,12 +2262,9 @@ namespace GMap.NET.GtkSharp
                 ret.X = f.X;
                 ret.Y = f.Y;
             }
-
-#endif
+				
             return ret;
         }
-
-#if !PocketPC
 
         /// <summary>
         /// shows map db export dialog
@@ -2470,7 +2343,6 @@ namespace GMap.NET.GtkSharp
 */
             return false;
         }
-		#endif
 
         private ScaleModes scaleMode = ScaleModes.Integer;
 
@@ -2513,8 +2385,7 @@ namespace GMap.NET.GtkSharp
                     {
                         zoomReal = value;
                     }
-
-#if !PocketPC
+						
                     double remainder = value % 1;
                     if (ScaleMode == ScaleModes.Fractional && remainder != 0)
                     {
@@ -2526,11 +2397,8 @@ namespace GMap.NET.GtkSharp
                         ZoomStep = Convert.ToInt32(value - remainder);
                     }
                     else
-#endif
                     {
-#if !PocketPC
                         MapRenderTransform = null;
-#endif
                         ZoomStep = (int)Math.Floor(value);
                         //zoomReal = ZoomStep;
                     }
@@ -2711,7 +2579,6 @@ namespace GMap.NET.GtkSharp
         {
             get
             {
-#if !PocketPC
                 if (!IsRotated) 
                 {
                     return Core.ViewArea;
@@ -2723,10 +2590,7 @@ namespace GMap.NET.GtkSharp
 
                     return RectLatLng.FromLTRB(p.Lng, p.Lat, p2.Lng, p2.Lat);
                 }
-                return RectLatLng.Empty;
-#else
-                return Core.ViewArea;
-#endif               
+                return RectLatLng.Empty;        
             }
         }
 
@@ -2983,7 +2847,6 @@ namespace GMap.NET.GtkSharp
 
         #endregion
 
-#if !PocketPC
         #region Serialization
 
         static readonly BinaryFormatter BinaryFormatter = new BinaryFormatter();
@@ -3032,7 +2895,6 @@ namespace GMap.NET.GtkSharp
         }
 
         #endregion
-#endif
     }
 
     public enum ScaleModes
@@ -3042,16 +2904,13 @@ namespace GMap.NET.GtkSharp
         /// </summary>
         Integer,
 
-#if !PocketPC
         /// <summary>
         /// scales to fractional level, CURRENT VERSION DOESN'T HANDLE OBJECT POSITIONS CORRECLTY, 
         /// http://greatmaps.codeplex.com/workitem/16046
         /// </summary>
         Fractional,
-#endif
     }
-
-#if !PocketPC
+		
     public enum HelperLineOptions
     {
         DontShow = 0,
@@ -3060,5 +2919,4 @@ namespace GMap.NET.GtkSharp
     }
 
     public delegate void SelectionChange(RectLatLng Selection, bool ZoomToFit);
-#endif
 }
