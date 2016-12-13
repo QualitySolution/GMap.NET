@@ -483,6 +483,12 @@ namespace GMap.NET.GtkSharp
             }
         }
 
+		public GPoint RenderOffset{
+			get{
+				return Core.renderOffset;
+			}
+		}
+
         // internal stuff
         internal readonly Core Core = new Core();
 
