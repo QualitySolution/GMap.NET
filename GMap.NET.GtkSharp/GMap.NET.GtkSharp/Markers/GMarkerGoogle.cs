@@ -211,21 +211,13 @@ namespace GMap.NET.GtkSharp.Markers
 
       public override void OnRender(Graphics g)
       {
-#if !PocketPC
-            if(BitmapShadow != null)
+			if (Bitmap == null)
+				return;
+			if (BitmapShadow != null)
             {
                g.DrawImage(BitmapShadow, LocalPosition.X, LocalPosition.Y, BitmapShadow.Width, BitmapShadow.Height);
-            }                
+            }
             g.DrawImage(Bitmap, LocalPosition.X, LocalPosition.Y, Size.Width, Size.Height);
-
-            //g.DrawString(LocalPosition.ToString(), SystemFonts.DefaultFont, Brushes.Red, LocalPosition);
-#else
-         if(BitmapShadow != null)
-         {
-            DrawImageUnscaled(g, BitmapShadow, LocalPosition.X, LocalPosition.Y);
-         }
-         DrawImageUnscaled(g, Bitmap, LocalPosition.X, LocalPosition.Y);
-#endif
       }
 
       public override void Dispose()
