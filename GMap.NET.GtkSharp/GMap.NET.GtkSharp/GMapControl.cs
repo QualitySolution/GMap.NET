@@ -2191,6 +2191,11 @@ namespace GMap.NET.GtkSharp
             return status;
         }
 
+		public PointLatLng FromLocalToLatLng (GPoint point)
+		{
+			return FromLocalToLatLng ((int)point.X, (int)point.Y);
+		}
+
         /// <summary>
         /// gets world coordinate from local control coordinate 
         /// </summary>
@@ -2377,7 +2382,8 @@ namespace GMap.NET.GtkSharp
             {
                 if (zoomReal != value)
                 {
-                    Debug.WriteLine("ZoomPropertyChanged: " + zoomReal + " -> " + value);
+					//FIXME May be this line crash in Tread on mono.
+					//Debug.WriteLine("ZoomPropertyChanged: " + zoomReal + " -> " + value);
 
                     if (value > MaxZoom)
                     {
