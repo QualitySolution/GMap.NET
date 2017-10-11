@@ -783,9 +783,10 @@ namespace GMap.NET.Internals
         volatile int skipOverZoom = 0;
 
 #if NET40
-        static readonly BlockingCollection<LoadTask> tileLoadQueue4 = new BlockingCollection<LoadTask>(new ConcurrentStack<LoadTask>());
+		internal static readonly BlockingCollection<LoadTask> tileLoadQueue4 = new BlockingCollection<LoadTask>(new ConcurrentStack<LoadTask>());
         static List<Task> tileLoadQueue4Tasks;
-        static int loadWaitCount = 0;
+		static int loadWaitCount = 0;
+		internal static int loadOnWaitTake = 0;
         void AddLoadTask(LoadTask t)
         {
             if (tileLoadQueue4Tasks == null)
@@ -818,7 +819,10 @@ namespace GMap.NET.Internals
                                             OnLoadComplete(ctid);
                                         }
                                     }
-                                    ProcessLoadTask(tileLoadQueue4.Take(), ctid);
+									Interlocked.Increment(ref loadOnWaitTake);
+									var task = tileLoadQueue4.Take();
+									Interlocked.Decrement(ref loadOnWaitTake);
+									ProcessLoadTask(task, ctid);
                                 }
                                 while (!tileLoadQueue4.IsAddingCompleted);
 
@@ -831,6 +835,12 @@ namespace GMap.NET.Internals
             }
             tileLoadQueue4.Add(t);
         }
+
+		public bool IsWaitTileLoad
+		{
+			get { return tileLoadQueue4.Count > 0 || loadOnWaitTake < GThreadPoolSize; }
+		}
+
 #else
         byte loadWaitCount = 0;
 
