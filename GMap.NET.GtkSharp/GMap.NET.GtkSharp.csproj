@@ -9,7 +9,6 @@
     <RootNamespace>System.Windows.Forms</RootNamespace>
     <AssemblyName>GMap.NET.GtkSharp</AssemblyName>
     <FileAlignment>512</FileAlignment>
-    <SignAssembly>true</SignAssembly>
     <AssemblyOriginatorKeyFile>sn.snk</AssemblyOriginatorKeyFile>
     <FileUpgradeFlags>
     </FileUpgradeFlags>
