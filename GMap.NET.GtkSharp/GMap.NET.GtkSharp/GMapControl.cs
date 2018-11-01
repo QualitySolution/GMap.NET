@@ -976,7 +976,7 @@ namespace GMap.NET.GtkSharp
             return ret;
         }
 
-		public Bitmap ToBitmap(Action<int> waitTilesCount = null)
+		public Bitmap ToBitmap(Action<int> waitTilesCount = null, bool runningFromMainThreed = true)
 		{
 			bool r = ForceDoubleBuffer;
 			Bitmap result;
@@ -995,8 +995,11 @@ namespace GMap.NET.GtkSharp
 
 					if(lastCount != Core.tileLoadQueue4.Count)
 						waitTilesCount?.Invoke(Core.tileLoadQueue4.Count);
-					
-					Gtk.Main.Iteration();
+
+					if(runningFromMainThreed)
+						Gtk.Main.Iteration();
+					else
+						Thread.Sleep(200);
 				}
 
 				DrawGraphics(gxOff);
