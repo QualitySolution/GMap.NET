@@ -1151,7 +1151,10 @@ namespace GMap.NET.GtkSharp
             }
             else
             {
-				using (Graphics g = Gtk.DotNet.Graphics.FromDrawable(e.Window))
+				if(e.Window == null) {
+					return base.OnExposeEvent(e);
+				}
+				using(Graphics g = Gtk.DotNet.Graphics.FromDrawable(e.Window))
 				{
 					g.SetClip(new Rectangle(e.Area.X, e.Area.Y, e.Area.Width, e.Area.Height));
 					DrawGraphics(g);
