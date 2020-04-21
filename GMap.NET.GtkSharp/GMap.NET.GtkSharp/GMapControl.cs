@@ -1151,14 +1151,15 @@ namespace GMap.NET.GtkSharp
             }
             else
             {
-				if(e.Window == null) {
+				Graphics g = null;
+				try {
+					g = Gtk.DotNet.Graphics.FromDrawable(e.Window);
+				} catch(NullReferenceException) {
 					return base.OnExposeEvent(e);
 				}
-				using(Graphics g = Gtk.DotNet.Graphics.FromDrawable(e.Window))
-				{
-					g.SetClip(new Rectangle(e.Area.X, e.Area.Y, e.Area.Width, e.Area.Height));
-					DrawGraphics(g);
-				}
+				g.SetClip(new Rectangle(e.Area.X, e.Area.Y, e.Area.Width, e.Area.Height));
+				DrawGraphics(g);
+				g.Dispose();
             }
 
 			if(HasFrame)
