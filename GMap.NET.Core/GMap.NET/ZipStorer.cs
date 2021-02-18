@@ -628,13 +628,13 @@ namespace System.IO.Compression
         }
         /* DOS Date and time:
             MS-DOS date. The date is a packed value with the following format. Bits Description 
-                0-4 Day of the month (1–31) 
+                0-4 Day of the month (1â€“31) 
                 5-8 Month (1 = January, 2 = February, and so on) 
                 9-15 Year offset from 1980 (add 1980 to get actual year) 
             MS-DOS time. The time is a packed value with the following format. Bits Description 
                 0-4 Second divided by 2 
-                5-10 Minute (0–59) 
-                11-15 Hour (0–23 on a 24-hour clock) 
+                5-10 Minute (0â€“59) 
+                11-15 Hour (0â€“23 on a 24-hour clock) 
         */
         private uint DateTimeToDosTime(DateTime _dt)
         {
