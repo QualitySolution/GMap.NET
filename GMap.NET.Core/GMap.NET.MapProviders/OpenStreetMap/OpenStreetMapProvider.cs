@@ -14,7 +14,6 @@ namespace GMap.NET.MapProviders
       public OpenStreetMapProviderBase()
       {
          MaxZoom = null;
-         RefererUrl = "http://www.openstreetmap.org/";
          Copyright = string.Format("© OpenStreetMap - Map data ©{0} OpenStreetMap", DateTime.Today.Year);
       }
 
